@@ -1,0 +1,143 @@
+@forward 'element-plus/theme-chalk/src/common/var.scss' with (
+  $colors: (
+    'white': #ffffff,
+    'black': #000000,
+    //'primary': (
+    //  'base': #3bc8f5,
+    //),
+    //'success': (
+    //  'base': #3bc8f5,
+    //),
+    //'warning': (
+    //  'base': #e6a23c,
+    //),
+    //'danger': (
+    //  'base': #f56c6c,
+    //),
+    //'error': (
+    //  'base': #f56c6c,
+    //),
+    //'info': (
+    //  'base': #3bc8f5,
+    //),
+  ),
+  //$border-radius: (
+  //  'base': 6px
+  //),
+  //$font-family: (
+  //  '':
+  //    "'Stolzlregular'"
+  //),
+  //$button-padding-horizontal: (
+  //  'default':''
+  //),
+  //$input-height: (
+  //  'default': ''
+  //),
+  //$input-line-height: (
+  //  'default': 3.4em
+  //),
+  //$common-component-size: (
+  //  'large':48px
+  //),
+  //$card: (
+  //  'border-radius':20px
+  //),
+  //$radio-bordered-input-width: (
+  //  'large':24px
+  //),
+  //$radio-bordered-input-height: (
+  //  'large':24px
+  //)
+
+);
+
+@use "element-plus/theme-chalk/src/index.scss" as *;
+
+/* ниже стили общие на все приложение*/
+#workarea {
+  overflow-x: hidden!important;
+}
+#workarea-content {
+  overflow: unset !important;
+}
+.workarea-content-paddings{
+  overflow-x: unset !important;
+}
+#app ::selection {
+  background: #cfcfcf;
+}
+*, :after, :before {
+  box-sizing: content-box;
+}
+
+
+/*чтоб в таблицах переносились слова*/
+.el-table .cell{
+  word-break: break-word!important;
+}
+
+.el-icon--close-tip {
+  display: none!important;;
+}
+
+.badgeItem {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  padding: 0 5px;
+  z-index: 10;
+  color: white;
+  background: #f56c6c;
+  border-radius: 20px;
+}
+.blueButton{
+  color: #fff!important;
+  background: #3bc8f5!important;
+  border-color: #3bc8f5!important;
+}
+
+.blueButton:hover{
+  background: #3fddff !important;
+}
+
+.el-icon--close-tip {
+  display: none!important;;
+}
+
+.link_download_files{
+  color: #409EFF;
+  text-decoration: underline;
+}
+span.userPhoto {
+  border-radius: 50%;
+  overflow: hidden;
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+.userPhoto img{
+  width: 32px;
+}
+.el-upload-dragger{
+  height: 178px!important;
+}
+
+//.bold {
+//  font-family: 'Stolzlbold';
+//}
+//
+//.medium {
+//  font-family: 'Stolzlmedium';
+//}
+//
+//.regular {
+//  font-family: 'Stolzlregular';
+//}
+//
+//.lite {
+//  font-family: 'Stolzl';
+//}
+
+
+
