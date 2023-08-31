@@ -2,17 +2,7 @@
   <pre-loader
       :loading="loading"
   >
-    <br/>
-    <el-table :data="value"  border max-height="600" stripe :show-header="false">
-      <el-table-column prop="name" />
-      <el-table-column>
-        <template #default="scope">
-          <div v-for="item in scope.row.value">
-            <span v-html="item"></span>
-          </div>
-        </template>
-      </el-table-column>
-    </el-table>
+    <detail_table :value="$attrs.value"/>
 
     <el-row v-if="responsible_id === user.id || full_access && !isLawyer || isAdmin" class="justify-between mt-3">
 
@@ -24,6 +14,17 @@
             @click="router.push({name:'editContract', params: { id: route.params.id }})"
         >
           Редактировать
+        </el-button>
+      </el-col>
+
+      <el-col
+          :xs="13" :sm="11" :md="10" :lg="8"
+          v-if="['contract_created', 'correction_primary_data'].includes(contractStatus) || (contractStatus === 'correction_after_approval' && count_protocols == 0)">
+        <el-button
+            class="blueButton w-full"
+            @click="emit('toBusinessProcess')"
+        >
+          Отправить на согласование
         </el-button>
       </el-col>
 
@@ -44,6 +45,7 @@
 
 <script>
 import preLoader from "@/components/pre_loader";
+import detail_table from "@/components/detail_table";
 import {ElMessageBox} from "element-plus";
 import {ContractRepo} from "@/repositories";
 import { useRouter, useRoute } from 'vue-router';
@@ -51,9 +53,9 @@ import {inject, ref} from "vue";
 
 export default {
   name       : "contractData",
-  props      : ['value', 'responsible_id'],
-  components : {preLoader},
-  setup(){
+  props      : ['responsible_id'],
+  components : {preLoader, detail_table},
+  setup(props, {emit}){
     const router          = useRouter();
     const route           = useRoute();
 
@@ -71,7 +73,7 @@ export default {
 
     const isAdmin         = user.roles.indexOf('admin') >= 0  ? true : false;
 
-    const isLawyer       = user.roles.indexOf('lawyer') >= 0 ? true : false;
+    const isLawyer        = user.roles.indexOf('lawyer') >= 0 ? true : false;
 
     async function toLawyer(){
       await ElMessageBox.confirm(`Вы уверены, что хотите все замечания устранены и передаем договор на согласование юристу?`)
@@ -101,7 +103,7 @@ export default {
     }
     return{
       loading, user, router, route, contractStatus, isAdmin, full_access, count_protocols, isLawyer,
-      toLawyer
+      toLawyer, emit
     }
   },
 }

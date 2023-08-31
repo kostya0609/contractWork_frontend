@@ -713,6 +713,8 @@ export default {
                                 reserveKeyword : true,
                                 loading : false,
                                 remoteMethod : async (query) => {
+                                  if(!query) return;
+
                                   this.grid.loading = true;
                                   let newOption = [];
                                   await this.grid.filter.data[dataValue.key].query ? newOption = await this.grid.filter.data[dataValue.key].query(query) : [];
@@ -741,6 +743,7 @@ export default {
                                     });
                                 },
                                 onChange : (value) => {
+
                                   if(value instanceof Array) {
                                     let arr = [];
                                     value.forEach(el => {
@@ -770,6 +773,7 @@ export default {
                                     }
                                   }
                                   this.$refs.search.query = '';
+
                                 },
                                 'modelValue' : this.grid.filter.data[key].value,
                                 'onUpdate:modelValue': value => {this.grid.filter.data[key].value = value; this.grid.filter.filterValueChange = true;}

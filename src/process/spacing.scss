@@ -1,32 +1,32 @@
 $sizes: '0' 0px, '1' 10px, '2' 20px, '3' 30px, '4' 40px, '5' 50px;
 
 @each $name, $size in $sizes {
-  .m-#{$name} {
+  .bp .m-#{$name} {
     margin: $size $size !important;
   }
-  .mt-#{$name} {
+  .bp .mt-#{$name} {
     margin-top: $size !important;
   }
-  .mb-#{$name} {
+  .bp .mb-#{$name} {
     margin-bottom: $size !important;
   }
-  .ml-#{$name} {
+  .bp .ml-#{$name} {
     margin-left: $size !important;
   }
-  .mr-#{$name} {
+  .bp .mr-#{$name} {
     margin-right: $size !important;
   }
 
-  .pt-#{$name} {
+  .bp .pt-#{$name} {
     padding-top: $size !important;
   }
-  .pb-#{$name} {
+  .bp .pb-#{$name} {
     padding-bottom: $size !important;
   }
-  .pl-#{$name} {
+  .bp .pl-#{$name} {
     padding-left: $size !important;
   }
-  .pr-#{$name} {
+  .bp .pr-#{$name} {
     padding-right: $size !important;
   }
 }

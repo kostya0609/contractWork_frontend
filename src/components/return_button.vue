@@ -8,11 +8,11 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 function goBack(){
-  if(!router.previous) {
+  if(!router.previous){
     router.push({name:'ListContracts'});
     return;
   }else{
-    if (router.previous === 'addContract' || router.previous === 'editContract') {
+    if (router.previous === 'addContract' || router.previous === 'editContract'){
       router.push({name:'ListContracts'});
       return;
     }

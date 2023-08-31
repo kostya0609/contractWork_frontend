@@ -21,6 +21,7 @@
 
     <Process
         v-if="contractStatus !== 'contract_cancel'"
+        :key="contractStatus"
         :config="configProcess"
         @process="getProcess"
     />
@@ -32,7 +33,7 @@
 
 <script>
 
-import {ref, provide, inject, reactive} from 'vue';
+import {ref, provide, inject, reactive, getCurrentInstance} from 'vue';
 import Process from "@/process/Process"
 import preLoader from "@/components/pre_loader";
 import { useRoute } from 'vue-router';
@@ -82,14 +83,13 @@ export default {
       subtitle    : [ sub_title[ process_id[ contractStatus.value ] ] ],
       full_access : full_access.value,
       data_notify : { //данные для формирования уведомления
-        executor : props.value.find(el => {return el.eng_name === 'responsible'}).value,
-        date     : props.value.find(el => {return el.eng_name === 'date'}).value,
+        executor : props.value.find(el => {return el.eng_name === 'responsible'}).value[0],
+        date     : props.value.find(el => {return el.eng_name === 'date'}).value[0],
         id       : route.params.id
-      }
+      },
     });
 
     async function getProcess(item){
-
       let status = {
         //статусы договора
         27 : 'contract_created', //это если руководитель вернул на доработки и с этого же статуса "27" мы стартуем процесс изначально
@@ -135,16 +135,8 @@ export default {
              else old_status = 'contract_created'
         }
 
-        if(contractStatus.value === 'contract_internal_approval'){ //полное внутреннее согласование
-          let members = Object.keys(item.stages_users).length;
-          let members_history = item.history.slice(-members);
-          let is_comment = members_history.find(el => {return el.result.indexOf('Оставить комментарий') >= 0});
-
-          if (is_comment)
-            old_status = 'correction_after_approval'; //если не согласовали
-              else
-                old_status = count_protocols.value > 0 ? 'lawyer_check' : 'correction_after_approval'; // если было аннулирование то надо понять как было до этого исходя из наличия протоколов разногласий
-        }
+        if(contractStatus.value === 'contract_internal_approval') //полное внутреннее согласование
+          old_status = count_protocols.value > 0 ? 'lawyer_check' : 'correction_after_approval'; // если было аннулирование то надо понять как было до этого исходя из наличия протоколов разногласий
 
         try {
           loading.value = true;
@@ -168,44 +160,58 @@ export default {
         }
       }; //аннулирование
 
+      //ниже если согласовали с комментариями то вернуть на корректировку и удалить процесс.. будет новое согласование
+      if (['contract_internal_approval'].includes(contractStatus.value) && item.stage_current && item.stage_current.id && item.breakpoint == item.stage_current.id){
+
+        try {
+          loading.value = true;
+          let result = await ProcessRepo.deleteProcessDoc({
+            process_document_id : route.params.id,
+            module_name         : 'ContractWork',
+            process_id          : [9],
+          });
+
+          if(result.notify) notify(result.notify);
+
+        } catch (e) {
+          notify({title : 'Ошибка при удалении процесса согласования.', message : e.message, type : 'error', duration : 5000})
+        }
+
+        finally {
+          loading.value = false;
+        }
+
+        try {
+          loading.value = true;
+          let result = await ContractRepo.changeStatus({
+            user_id     : user.id,
+            contract_id : route.params.id,
+            status      : 'correction_after_approval',
+            users_id    : [],
+          });
+
+          contractStatus.value = 'correction_after_approval';
+
+          if(result.notify) notify(result.notify);
+          return;
+
+        } catch (e) {
+          notify({title : 'Ошибка при изменении статуса договора.', message : e.message, type : 'error', duration : 5000})
+        }
+
+        finally {
+          loading.value = false;
+        }
+
+      }
 
       //обновляем статус договора от модуля согласования если прошло изменение
       //ниже массив статусов, находясь в которых, у договора разрешено менять статус из модуля согласования
        if (['contract_created', 'manager_approval', 'lawyer_check', 'correction_primary_data', 'correction_after_approval', 'contract_internal_approval'].includes(contractStatus.value) &&
-           status[item.status_current] && contractStatus.value !== status[item.status_current]) {
+           status[item.status_current] && contractStatus.value != status[item.status_current]) {
 
          let new_status = status[item.status_current];
          let users_id   = item.stage_current_users ? item.stage_current_users : [];
-
-         //ниже если согласовали с комментариями то вернуть на корректировку и удалить процесс.. будет новое согласование
-         if(item.status_current == 33){
-           let members = Object.keys(item.stages_users).length;
-           let members_history = item.history.slice(-members);
-           let is_comment = members_history.find(el => {return el.result.indexOf('Оставить комментарий') >= 0})
-
-           if (is_comment) {
-             new_status = 'correction_after_approval';
-
-             try {
-               loading.value = true;
-               let result = await ProcessRepo.deleteProcessDoc({
-                 process_document_id : route.params.id,
-                 module_name         : 'ContractWork',
-                 process_id          : [9],
-               });
-
-               if(result.notify) notify(result.notify);
-
-             } catch (e) {
-               notify({title : 'Ошибка при удалении процесса согласования.', message : e.message, type : 'error', duration : 5000})
-             }
-
-             finally {
-               loading.value = false;
-             }
-           }
-
-         }
 
          //ниже обновить статус документа
          try {

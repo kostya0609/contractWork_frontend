@@ -3,7 +3,7 @@
       :loading="loading"
   >
 
-    <div class="flex justify-between pb-2">
+    <div class="flex justify-between pb-4">
       <h3>Просмотр договора № {{route.params.id}}, статус - {{MAP[contractStatus]}} {{waiting_edit ? '(ожидание корретировки инициатором)' : ''}}.</h3>
       <returnButton class="no-print"/>
     </div>
@@ -14,6 +14,11 @@
           v-if="page === 'contract' && !loading"
           :value="contract.data"
           :responsible_id = contract.responsible_id
+          @toBusinessProcess = "page = 'business_process'"
+        />
+        <files
+          v-if="page === 'files' && !loading"
+          :value="files.data"
         />
         <business_process
           v-if="page === 'business_process' && !loading"
@@ -35,6 +40,7 @@
           :responsible_id = contract.responsible_id
         />
         <logs  v-if="page === 'logs'  && !loading" />
+        <bp_logs  v-if="page === 'bp_logs'  && !loading" />
     </el-tabs>
 
   </pre-loader>
@@ -49,14 +55,19 @@ import preLoader from "@/components/pre_loader";
 import returnButton from "@/components/return_button";
 import business_process from "@/pages/contracts/detail/components/business_process"
 import contract from "@/pages/contracts/detail/components/contract"
+import files from "@/pages/contracts/detail/components/files"
 import scans from "@/pages/contracts/detail/components/scans"
 import lawyer from "@/pages/contracts/detail/components/lawyer"
 import logs from "@/pages/contracts/detail/components/logs"
+import bp_logs from "@/pages/contracts/detail/components/bp_logs"
 import protocols from "@/pages/contracts/detail/components/protocols"
+import Logs_bp from "@/pages/contracts/detail/components/bp_logs";
 
 export default {
   name       : "detailContractIndex",
-  components : {preLoader, returnButton, business_process, contract, scans, lawyer, logs, protocols},
+  components : {
+    Logs_bp,
+    preLoader, returnButton, business_process, contract, files, scans, lawyer, logs, bp_logs, protocols},
   setup(){
     const router          = useRouter();
     const route           = useRoute();
@@ -79,17 +90,23 @@ export default {
 
     const menu            = reactive({
       contract         : 'Договор',
-      business_process : 'Согласование',
-      lawyer           : 'Юридические данные',
+      files            : 'Файлы',
+      lawyer           : 'Комментарии ЮО',
       protocols        : 'Протокол разногласий',
       scans            : 'Сканы документов',
-      logs             : 'История',
+      business_process : 'Бизнес процесс',
+      logs             : 'История по договору',
+      bp_logs          : 'История бизнес процесса',
     });
 
     const contract        = reactive({
       status         : null,
       data           : [],
       responsible_id : null
+    });
+
+    const files           = reactive({
+      data : [],
     });
 
     const lawyer          = reactive({
@@ -142,6 +159,8 @@ export default {
 
         if (result.data.contract) contract.data = result.data.contract;
 
+        if (result.data.files) files.data = result.data.files;
+
         if (result.data.lawyer && result.data.lawyer.data)  lawyer.data = result.data.lawyer.data;
 
         if (result.data.protocols && result.data.protocols.data) protocols.data = result.data.protocols.data;
@@ -170,7 +189,7 @@ export default {
     };
     getData();
 
-    return{loading, route, router, MAP, contractStatus, page, menu, contract, lawyer, protocols, scans,
+    return{loading, route, router, MAP, contractStatus, page, menu, contract, files, lawyer, protocols, scans,
       count_protocols, waiting_edit, user,
     }
   }

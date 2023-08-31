@@ -7,13 +7,13 @@
     >
       <template v-for="(item, key) in menu" :key="key">
         <el-menu-item :index="item.path"> {{item.name}} </el-menu-item>
-        <span v-if="item.name == 'Требует вашей реакции'" class="relative"><span class="badgeItem"> {{needActions}}</span></span>
+        <span v-if="item.name == 'Требует вашей реакции' && needActions" class="relative"><span class="badgeItem"> {{needActions}}</span></span>
       </template>
 
     </el-menu>
     <el-button
       @click="router.push({path : route.meta.path})"
-      class="absolute right-5 top-2 uppercase blueButton"
+      class="absolute right-0 top-2 uppercase blueButton"
     >
       Добавить {{route.meta.label}}
     </el-button>

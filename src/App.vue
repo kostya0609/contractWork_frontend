@@ -1,4 +1,5 @@
 <template>
+
   <pre-loader
       :loading="loading"
       class="mx-auto"
@@ -8,6 +9,7 @@
       <router-view/>
     </div>
   </pre-loader>
+
 </template>
 
 <script>
@@ -44,6 +46,7 @@ export default {
       id            : 14317,
       roles         : [],
       FIO           : '',
+      department    : '',
     });
     const navBarVisible             = computed(() => {
       let currentRoute              = router.currentRoute.value.name;
@@ -102,7 +105,8 @@ export default {
 
           user.roles.length = 0;
           result.data.roles.forEach(el => user.roles.push(el));
-          user.FIO   = result.data.user.FIO;
+          user.FIO        = result.data.user.FIO;
+          user.department = result.data.user.department;
 
           isOK.value = true;
 
@@ -117,6 +121,7 @@ export default {
       } else {
         user.roles.length = 0;
         user.FIO          = '';
+        user.department   = '';
         isOK.value        = false;
         notify({title : 'Проблема с авторизацией на портале', message : 'Нет токена.', type : 'error'});
         timerId.value   = setInterval(async () => await initData(), 15000 );
@@ -128,7 +133,7 @@ export default {
       return (+number).toLocaleString('ru-RU',{ minimumFractionDigits: 2 });
     };
 
-    const downLoadFile = async(file) =>{
+    const downLoadFile              = async(file) =>{
       if(!file.id) {
         notify({title : 'Ошибка загрузки файла', message : 'Этот файл недоступен для скачивания. Так как был только что добавлен.', type : 'error'});
         return

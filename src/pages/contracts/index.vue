@@ -2,7 +2,6 @@
   <pre-loader
       :loading="loading"
   >
-    <br/>
     <Grid
         :name="name"
         @gridReady="getData"
@@ -35,6 +34,8 @@ export default {
     const router       = useRouter();
 
     const loading      = computed(() => { return dataGrid.loading });
+
+    const isAdmin      = user.roles.indexOf('admin') >= 0  ? true : false;
 
     const name         = ref('contractWorkList');
 
@@ -69,8 +70,8 @@ export default {
           sort: 400,
           //contentSort: 'asc'
         },
-        contract_direction  : {
-          name: 'Направление',
+        department  : {
+          name: 'Подразделение',
           width: 200,
           show: true,
           sort: 500,
@@ -97,13 +98,6 @@ export default {
           sort: 800,
          // contentSort: 'asc'
         },
-        recording           : {
-          name: 'Регистратор',
-          width: 250,
-          show: true,
-          sort: 900,
-         // contentSort: 'asc'
-        },
         lookers             : {
           name: 'Наблюдатели',
           width: 250,
@@ -118,20 +112,20 @@ export default {
           sort: 1100,
           //contentSort: 'asc'
         },
-        main_files           : {
-          name: 'Основные файлы',
-          width: 250,
-          show: true,
-          sort: 1200,
-          //contentSort: 'asc'
-        },
-        comment_files           : {
-          name: 'Файлы комментарии',
-          width: 250,
-          show: true,
-          sort: 1300,
-          //contentSort: 'asc'
-        },
+        // main_files           : {
+        //   name: 'Основные файлы',
+        //   width: 250,
+        //   show: true,
+        //   sort: 1200,
+        //   //contentSort: 'asc'
+        // },
+        // comment_files           : {
+        //   name: 'Файлы комментарии',
+        //   width: 250,
+        //   show: true,
+        //   sort: 1300,
+        //   //contentSort: 'asc'
+        // },
         date_created        : {
           name: 'Дата создания',
           width: 200,
@@ -152,7 +146,7 @@ export default {
             if(!row.row.full_access[0].value){notify({title: 'Редактирование договора', message :'У вас нет прав на редактирование договора', type : 'error'}); return}
 
             if(!['contract_created','correction_primary_data'].includes(row.row.status_eng[0].value) &&
-                (row.row.status_eng[0].value !== 'correction_after_approval' && !row.row.waiting_edit)
+                (row.row.status_eng[0].value !== 'correction_after_approval' && !row.row.waiting_edit && !isAdmin)
             ) return notify({title : 'Редактирование договора', message : `Редактирование договора допускается на этапе подготовки или корректировки данных! Текущий статус - ${row.row.status[0].value}.`, type : 'error'});
 
             ElMessageBox.confirm(`Вы уверены, что хотите редактировать договор с ID - ${row.row.id[0].value}?`)
@@ -373,18 +367,18 @@ export default {
             if (result.success == true) return result.data
           },
         },
-        contract_direction_id : {
-          show: true,
-          type: 'list',
-          name: 'Направление',
-          multiple: true,
-          value: [],
-          option: [],
-          focus : async function (){
-            let result = await grid.loadJson('/contract-work/v1/contracts/get-contract-direction', {});
-            if (result.success === true && result.data) return result.data;
-          },
-        },
+        // contract_direction_id : {
+        //   show: true,
+        //   type: 'list',
+        //   name: 'Направление',
+        //   multiple: true,
+        //   value: [],
+        //   option: [],
+        //   focus : async function (){
+        //     let result = await grid.loadJson('/contract-work/v1/contracts/get-contract-direction', {});
+        //     if (result.success === true && result.data) return result.data;
+        //   },
+        // },
         contragent_id         : {
           show: true,
           type: 'searchList',
@@ -420,6 +414,20 @@ export default {
           option: [],
           query: async function (data) {
             let result = await grid.loadJson('/contract-work/v1/search/user', {
+              q: data,
+            });
+            if (result.success == true) return result.data
+          },
+        },
+        department_id        : {
+          show: true,
+          type: 'searchList',
+          name: 'Подразделение',
+          multiple: true,
+          value: [],
+          option: [],
+          query: async function (data) {
+            let result = await grid.loadJson('/contract-work/v1/search/department', {
               q: data,
             });
             if (result.success == true) return result.data

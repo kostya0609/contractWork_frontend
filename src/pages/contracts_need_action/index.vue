@@ -2,7 +2,6 @@
   <pre-loader
       :loading="loading"
   >
-    <br/>
     <Grid
         :name="name"
         @gridReady="getData"
@@ -71,9 +70,9 @@ export default {
           sort: 400,
           //contentSort: 'asc'
         },
-        contract_direction  : {
-          name: 'Направление',
-          width: 300,
+        department  : {
+          name: 'Подразделение',
+          width: 200,
           show: true,
           sort: 500,
           //contentSort: 'asc'
@@ -97,13 +96,6 @@ export default {
           width: 300,
           show: true,
           sort: 800,
-          // contentSort: 'asc'
-        },
-        recording           : {
-          name: 'Регистратор',
-          width: 300,
-          show: true,
-          sort: 900,
           // contentSort: 'asc'
         },
         lookers             : {
@@ -312,18 +304,18 @@ export default {
             if (result.success == true) return result.data
           },
         },
-        contract_direction_id : {
-          show: true,
-          type: 'list',
-          name: 'Направление',
-          multiple: true,
-          value: [],
-          option: [],
-          focus : async function (){
-            let result = await grid.loadJson('/contract-work/v1/contracts/get-contract-direction', {});
-            if (result.success === true && result.data) return result.data;
-          },
-        },
+        // contract_direction_id : {
+        //   show: true,
+        //   type: 'list',
+        //   name: 'Направление',
+        //   multiple: true,
+        //   value: [],
+        //   option: [],
+        //   focus : async function (){
+        //     let result = await grid.loadJson('/contract-work/v1/contracts/get-contract-direction', {});
+        //     if (result.success === true && result.data) return result.data;
+        //   },
+        // },
         contragent_id         : {
           show: true,
           type: 'searchList',
@@ -359,6 +351,20 @@ export default {
           option: [],
           query: async function (data) {
             let result = await grid.loadJson('/contract-work/v1/search/user', {
+              q: data,
+            });
+            if (result.success == true) return result.data
+          },
+        },
+        department_id        : {
+          show: true,
+          type: 'searchList',
+          name: 'Подразделение',
+          multiple: true,
+          value: [],
+          option: [],
+          query: async function (data) {
+            let result = await grid.loadJson('/contract-work/v1/search/department', {
               q: data,
             });
             if (result.success == true) return result.data
