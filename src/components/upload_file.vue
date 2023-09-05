@@ -1,88 +1,91 @@
 <template>
-  <el-row class="mb-3">
-    <el-col>
+  <div class="w-full">
 
-      <label :class="{'text-red-500' : element.errors}">
-        {{element.label}}
-      </label>
+    <div v-if="element.multiple" class="mt-1">
+      <el-upload
+          v-model:file-list="element.list"
+          drag
+          ref="upload"
+          action=""
+          multiple
+          :auto-upload="false"
+          :on-change="changeFile"
+          :on-remove="deleteBth"
+          :on-preview = 'downLoadFile'
+          :disabled="isDisable"
+      >
+        <div
+            v-if="!isDisable"
+        >
+          <el-icon class="el-icon--upload"><upload-filled/></el-icon>
+          <div class="el-upload__text">
+            Перенесите файл в эту область
+          </div>
+        </div>
+        <div
+            v-else
+        >
+          <p>
+            Изменить нельзя"
+          </p>
+        </div>
+      </el-upload>
+    </div>
 
-      <div v-if="element.multiple" class="mt-1">
+    <div v-else>
+
+      <div v-if="element.list.length === 0" class="flex justify-end">
+        <small class="text-red-500 mr-2" v-if="element.errors">{{element.errors}}</small>
         <el-upload
             v-model:file-list="element.list"
-            drag
-            ref="upload"
             action=""
-            multiple
+            ref="upload"
             :auto-upload="false"
+            :limit = "1"
+            :on-exceed="uploadBtn"
             :on-change="changeFile"
-            :on-remove="deleteBth"
-            :on-preview = 'downLoadFile'
+            :show-file-list="false"
             :disabled="isDisable"
         >
-          <div
-              v-if="!isDisable"
-          >
-            <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-            <div class="el-upload__text">
-              Перенесите файл в эту область или <em>нажмите на иконку загрузки</em>
-            </div>
-          </div>
-          <div
-              v-else
-          >
-            <p>
-              Изменять дополнительные файлы разрешается если договор имеет статус "На подготовке", "На корректировке первичных данных" или "На корректировке после согласования"
-            </p>
-          </div>
-        </el-upload>
-      </div>
-
-      <div v-else class="mt-1">
-        <div v-if="element.list.length === 0">
-          <el-upload
-              v-model:file-list="element.list"
-              action=""
-              ref="upload"
-              :auto-upload="false"
-              :limit = "1"
-              :on-exceed="uploadBtn"
-              :on-change="changeFile"
-              :show-file-list="false"
+          <el-button
+              size="small"
               :disabled="isDisable"
           >
-            <el-button
-                class="uppercase blueButton w-full"
-                :disabled="isDisable"
-            >
-              Загрузить
-            </el-button>
-          </el-upload>
-          <small class="text-red-500" v-if="element.errors">{{element.errors}}</small>
-        </div>
-        <div class="grid lg:grid-cols-[90%_10%] md:grid-cols-[70%_10%] sm:grid-cols-[40%_10%] gap-1 mt-1" v-else>
-          <el-button
-              class="w-full"
-              @click="downLoadFile(element.list[0])"
-          >
-            {{element.list[0].name}}
+            <el-icon><Paperclip /></el-icon>
           </el-button>
-          <el-button
-              v-if="!isDisable"
-              @click="deleteBth('', 'contract')"
-              type="danger"
-          >
-            X
-          </el-button>
-        </div>
+
+        </el-upload>
+
       </div>
 
-    </el-col>
-  </el-row>
+      <div v-else class="grid grid-cols-[14px_1fr_35.8px] gap-x-2 items-center mmm-class">
+        <el-icon
+          class="cursor-pointer"
+          @click="downLoadFile(element.list[0])"
+        ><Document /></el-icon>
+        <span
+          class="w-full !m-0 cursor-pointer text-sm text-slate-600"
+          @click="downLoadFile(element.list[0])"
+          style="overflow: hidden; text-overflow: ellipsis"
+          :title="element.list[0].name"
+        >
+            {{element.list[0].name}}
+          </span>
+        <el-icon
+          class="mmm-button"
+          v-if="!isDisable"
+          @click="deleteBth('', 'contract')"
+        >
+          <Close/>
+        </el-icon>
+      </div>
+    </div>
+
+  </div>
 
 </template>
 
 <script>
-
 
 import {inject, ref} from "vue";
 

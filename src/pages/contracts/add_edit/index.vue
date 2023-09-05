@@ -4,7 +4,7 @@
       class="mx-auto"
   >
 
-    <div class="flex justify-between pb-4">
+    <div class="flex justify-between pb-3">
       <h3 class="font-bold text-xl mr-5">{{route.name === 'addContract' ? 'Создание нового' : 'Редактирование'}} договора{{route.name === 'editContract' ? ` c ID  - ${route.params.id}` : ''}}</h3>
       <returnButton/>
     </div>
@@ -35,6 +35,23 @@
           v-if="page === 'files' && !loading"
           v-model:files="files"
           :waiting_edit="contract.waiting_edit"
+          :credit_link="credit_link"
+          @set_link="set_link"
+        />
+      </el-tab-pane>
+
+      <el-tab-pane name="note" key="note">
+        <template #label>
+          <span :class="{'text-red-500' : errors.note_tab}">
+            <span>Пояснительная записка</span>
+          </span>
+        </template>
+        <note
+            v-if="page === 'note' && !loading"
+            v-model:note="note"
+            :errors="errors"
+            :options_list="options_list"
+            :waiting_edit="contract.waiting_edit"
         />
       </el-tab-pane>
     </el-tabs>
@@ -51,6 +68,13 @@
         </el-button>
       </el-col>
     </el-row>
+    <span
+        v-if="route.name === 'editContract'"
+        class="block text-red-500 mt-2"
+    >
+      Обратите внимание. Для сохранения любых измений или прикрепленных файлов, необходимо нажать кнопку "Сохранить изменения". При необходимости можны выйти из окна редактирования, нажав кнопку "Вернуться назад", тогда любые изменения сохранены не будут!
+    </span>
+
   </pre-loader>
 </template>
 
@@ -60,6 +84,7 @@ import {ContractRepo} from '@/repositories';
 import preLoader from "@/components/pre_loader";
 import main_data from "@/pages/contracts/add_edit/components/main_data";
 import files from "@/pages/contracts/add_edit/components/files";
+import note from "@/pages/contracts/add_edit/components/note";
 
 import returnButton from "@/components/return_button";
 import {ref, inject, reactive, watchEffect} from "vue";
@@ -67,7 +92,7 @@ import { useRouter, useRoute } from 'vue-router';
 
 export default {
   name       : "addEditContractIndex",
-  components : {returnButton, preLoader, main_data, files},
+  components : {returnButton, preLoader, main_data, files, note},
   setup(){
     const router         = useRouter();
     const route          = useRoute();
@@ -131,14 +156,6 @@ export default {
         }, //другие дополнительные файлы
       },
       right : {
-        note      : {
-          list     : [],
-          file     : [],
-          id       : [],
-          label    : 'Пояснительная записка',
-          multiple : false,
-          errors   : null,
-        },//пояснительная записка
         info      : {
           list     : [],
           file     : [],
@@ -198,6 +215,15 @@ export default {
       },
     });
 
+    const credit_link    = ref('');
+
+    const note           = reactive({
+      comment    : '',
+      aim        : '',
+      holder_id  : '',
+      type       : '',
+    });
+
     const options_list   = reactive({
       contract_type_list      : [],
       organization_list       : [],
@@ -207,11 +233,13 @@ export default {
       responsible_list        : [],
       lookers_list            : [],
       signatory_list          : [],
+      holder_list             : [],
     });
 
     const errors         = reactive({
       main_data_tab         : null,
       files_tab             : null,
+      note_tab              : null,
 
       contract_type_id      : null,
       organization_id       : null,
@@ -221,11 +249,20 @@ export default {
       responsible_id        : null,
       signatory_id          : null,
       content               : null,
+
+      comment               : null,
+      aim                   : null,
+      holder_id             : null,
+      type                  : null,
     });
 
     const page           = ref('main_data');
 
     const isAdmin        = user.roles.indexOf('admin') >= 0  ? true : false;
+
+    const set_link       = (link) => {
+      credit_link.value  = link;
+    };
 
     async function getData(){
       try{
@@ -243,19 +280,24 @@ export default {
 
         Object.assign(contract, result.data.contract_data);
 
+        Object.assign(note, result.data.note_data);
+
+        credit_link.value = result.data.credit_link;
+
         contractStatus.value = contract.status;
+
         Object.keys(result.data.options).forEach(name => {
           result.data.options[name].forEach(el => options_list[name].push(el));
-        })
+        });
 
         Object.keys(result.data.files).forEach(side => {
           Object.keys(result.data.files[side]).forEach(name => {
             files[side][name].id   = result.data.files[side][name];
             files[side][name].list = result.data.files[side][name];
           });
-        })
+        });
 
-        if(result.notify) notify(result.notify)
+        if(result.notify) notify(result.notify);
 
        } catch (e) {
          router.push({name : 'ListContracts'})
@@ -281,6 +323,11 @@ export default {
 
       if(files.left.contract.file.length === 0 && files.left.contract.id.length === 0) {valid = false; files.left.contract.errors = 'Необходимо прикрепить файл договора'};
 
+      if(!note.comment)               {valid = false; errors.comment          = 'Необходимо указать преамбулу / комментарий!'};
+      if(!note.aim)                   {valid = false; errors.aim              = 'Необходимо указать цель!'};
+      if(!note.holder_id)             {valid = false; errors.holder_id        = 'Необходимо указать держателя договора!'};
+      if(!note.type)                  {valid = false; errors.type             = 'Необходимо указать тип договора!'};
+
       if(!valid) notify({title : 'Ошибка заполнения формы',message : 'Проверте заполнение обязательных полей. Обратите внимание на вкладки, выделенные красным цветом!',type : 'error', duration : 5000});
       return valid;
       }
@@ -289,7 +336,7 @@ export default {
       if (!validation()) return;
 
       let data = new FormData();
-      data.append('data', JSON.stringify(contract));
+      data.append('data', JSON.stringify({...contract, ...note, credit_link : credit_link.value}));
 
       Object.keys(files).forEach(side => {
 
@@ -339,6 +386,11 @@ export default {
       contract.signatory_id           ? errors.signatory_id          = null : '';
       contract.content                ? errors.content               = null : '';
 
+      note.comment                    ? errors.comment               = null : '';
+      note.aim                        ? errors.aim                   = null : '';
+      note.holder_id                  ? errors.holder_id             = null : '';
+      note.type                       ? errors.type                 = null : '';
+
       files.left.contract.file.length ? files.left.contract.errors   = null : '';
 
       errors.main_data_tab = !!(errors.contract_type_id || errors.organization_id || errors.department_id ||
@@ -346,12 +398,14 @@ export default {
           errors.signatory_id || errors.content);
 
       errors.files_tab = !!(files.left.contract.errors);
+
+      errors.note_tab = !!(errors.comment || errors.aim || errors.holder_id || errors.type);
     });
 
     return{
-      loading, route, contract, errors, contractStatus, page, files, options_list,
+      loading, route, contract, errors, contractStatus, page, files, options_list, note, credit_link,
 
-      saveContract, isAdmin,
+      saveContract, isAdmin, set_link
     }
   },
 

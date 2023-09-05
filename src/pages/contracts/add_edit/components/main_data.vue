@@ -80,7 +80,7 @@
             filterable
             remote
             reserve-keyword
-            :remote-method="(file) => search(file, 'organization', 'organization')"
+            :remote-method="(query) => search(query, 'organization', 'organization')"
             placeholder="Введите название организации"
             :disabled="isDisable"
         >
@@ -106,7 +106,7 @@
             filterable
             remote
             reserve-keyword
-            :remote-method="(file) => search(file, 'contragent', 'contragent')"
+            :remote-method="(query) => search(query, 'contragent', 'contragent')"
             placeholder="Введите название контрагента"
             :disabled="isDisable"
         >
@@ -156,7 +156,7 @@
             filterable
             remote
             reserve-keyword
-            :remote-method="(file) => search(file, 'user', 'looker')"
+            :remote-method="(query) => search(query, 'user', 'looker')"
             :multiple="true"
             placeholder="Введите ФИО наблюдателя"
             :disabled="isDisable"
@@ -182,7 +182,7 @@
             filterable
             remote
             reserve-keyword
-            :remote-method="(file) => search(file, 'user', 'signatory')"
+            :remote-method="(query) => search(query, 'user', 'signatory')"
             placeholder="Введите ФИО подписанта"
             :disabled="isDisable"
         >

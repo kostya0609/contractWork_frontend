@@ -20,19 +20,23 @@
           v-if="page === 'files' && !loading"
           :value="files.data"
         />
+        <note
+          v-if="page === 'note' && !loading"
+          :value="note.data"
+        />
         <business_process
           v-if="page === 'business_process' && !loading"
           :value="contract.data"
         />
         <lawyer
-            v-if="page === 'lawyer' && !loading"
-            :value="lawyer"
-            @toApprove="page='business_process'"
+          v-if="page === 'lawyer' && !loading"
+          :value="lawyer"
+          @toApprove="page='business_process'"
         />
         <protocols
-            v-if="page === 'protocols' && !loading"
-            :value="protocols"
-            @toApprove="page='business_process'"
+          v-if="page === 'protocols' && !loading"
+          :value="protocols"
+          @toApprove="page='business_process'"
         />
         <scans
           v-if="page === 'scans' && !loading"
@@ -56,6 +60,7 @@ import returnButton from "@/components/return_button";
 import business_process from "@/pages/contracts/detail/components/business_process"
 import contract from "@/pages/contracts/detail/components/contract"
 import files from "@/pages/contracts/detail/components/files"
+import note from "@/pages/contracts/detail/components/note"
 import scans from "@/pages/contracts/detail/components/scans"
 import lawyer from "@/pages/contracts/detail/components/lawyer"
 import logs from "@/pages/contracts/detail/components/logs"
@@ -67,7 +72,7 @@ export default {
   name       : "detailContractIndex",
   components : {
     Logs_bp,
-    preLoader, returnButton, business_process, contract, files, scans, lawyer, logs, bp_logs, protocols},
+    preLoader, returnButton, business_process, contract, files, note, scans, lawyer, logs, bp_logs, protocols},
   setup(){
     const router          = useRouter();
     const route           = useRoute();
@@ -91,6 +96,7 @@ export default {
     const menu            = reactive({
       contract         : 'Договор',
       files            : 'Файлы',
+      note             : 'Пояснительная записка',
       lawyer           : 'Комментарии ЮО',
       protocols        : 'Протокол разногласий',
       scans            : 'Сканы документов',
@@ -106,6 +112,10 @@ export default {
     });
 
     const files           = reactive({
+      data : [],
+    });
+
+    const note            = reactive({
       data : [],
     });
 
@@ -161,6 +171,8 @@ export default {
 
         if (result.data.files) files.data = result.data.files;
 
+        if (result.data.note) note.data = result.data.note;
+
         if (result.data.lawyer && result.data.lawyer.data)  lawyer.data = result.data.lawyer.data;
 
         if (result.data.protocols && result.data.protocols.data) protocols.data = result.data.protocols.data;
@@ -189,7 +201,7 @@ export default {
     };
     getData();
 
-    return{loading, route, router, MAP, contractStatus, page, menu, contract, files, lawyer, protocols, scans,
+    return{loading, route, router, MAP, contractStatus, page, menu, contract, note, files, lawyer, protocols, scans,
       count_protocols, waiting_edit, user,
     }
   }

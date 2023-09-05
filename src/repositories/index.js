@@ -10,6 +10,7 @@ import {ScansRepository} from "./ScansRepository"
 import {RolesRepository} from "./RolesRepository"
 import {UsersRepository} from "./UsersRepository"
 import {GridRepository} from "./GridRepository"
+import {CreditRepository} from "./CreditRepository"
 
 export const SearchRepo          = new SearchRepository();
 export const ContractRepo        = new ContractRepository();
@@ -23,3 +24,4 @@ export const ScansRepo           = new ScansRepository();
 export const RolesRepo           = new RolesRepository();
 export const UsersRepo           = new UsersRepository();
 export const GridRepo            = new GridRepository();
+export const CreditRepo          = new CreditRepository();
